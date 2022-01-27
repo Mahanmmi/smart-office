@@ -29,7 +29,8 @@ func NewServer(conf *config.MainServerConfig, databases *db.MainServerDatabase) 
 	}))
 
 	server.echoServer.POST("/api/office/register", server.OfficeRegister)
-	server.echoServer.GET("/api/office", server.GetLightTimes)
+	server.echoServer.GET("/api/office/checkin", server.CheckIn)
+	server.echoServer.GET("/api/office/lights", server.GetLightTimes)
 
 	adminGroup := server.echoServer.Group("/api/admin")
 	adminGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
