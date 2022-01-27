@@ -16,12 +16,12 @@ services:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
   mqtt:
     image: eclipse-mosquitto
-    container_name: mqtt
+    container_name: mqtt-broker
     restart: always
     volumes:
-        - ./volume/mqtt/config/mosquitto.conf:/mosquittp/config/mosquitto.conf:ro
-        - ./volume/mqtt/log:/mosquittp/config/log
-        - ./volume/mqtt/data:/mosquittp/config/data
+        - ./volume/mqtt/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+        - ./volume/mqtt/log:/mosquitto/config/log
+        - ./volume/mqtt/data:/mosquitto/config/data
     ports:
-      - 1883:1883
+      - 9100:9100
       - 9001:9001
