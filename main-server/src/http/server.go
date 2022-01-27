@@ -28,7 +28,8 @@ func NewServer(conf *config.MainServerConfig, databases *db.MainServerDatabase) 
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 
-	server.echoServer.GET("/api/office/register", server.OfficeRegister)
+	server.echoServer.POST("/api/office/register", server.OfficeRegister)
+	server.echoServer.GET("/api/office", server.GetLightTimes)
 
 	adminGroup := server.echoServer.Group("/api/admin")
 	adminGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
@@ -59,6 +60,8 @@ func NewServer(conf *config.MainServerConfig, databases *db.MainServerDatabase) 
 			return false
 		},
 	}))
+	userGroup.POST("/login", server.UserLogin)
+	userGroup.POST("/:userid", server.UpdateRoomLight)
 
 	return &server
 }

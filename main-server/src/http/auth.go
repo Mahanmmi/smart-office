@@ -11,6 +11,6 @@ type AdminClaims struct {
 }
 
 type UserClaims struct {
-	UserID string `json:"user_id"`
+	UserID int16 `json:"user_id"`
 	jwt.StandardClaims
 }
