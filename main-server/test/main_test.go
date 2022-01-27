@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"github.com/Mahanmmi/fuzzy-lamp/main-server/config"
@@ -6,9 +6,10 @@ import (
 	"github.com/Mahanmmi/fuzzy-lamp/main-server/src"
 	"github.com/jackc/pgx"
 	"log"
+	"testing"
 )
 
-func main() {
+func TestMain(m *testing.M) {
 	conf := config.NewMainServerConfig()
 	conn, err := pgx.Connect(pgx.ConnConfig{
 		Host:     conf.PostgresDB.Host,
@@ -23,4 +24,10 @@ func main() {
 
 	database := db.NewMainServerDatabase(conn)
 	go src.NewMainServer(conf, database).Start()
+
+	m.Run()
+}
+
+func Test(t *testing.T) {
+
 }

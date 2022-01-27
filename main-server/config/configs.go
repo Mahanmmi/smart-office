@@ -10,6 +10,7 @@ type MainServerConfig struct {
 		Host     string
 		Port     uint16
 		User     string
+		Password string
 		Database string
 	}
 }
@@ -18,6 +19,7 @@ func NewMainServerConfig() *MainServerConfig {
 	viper.SetConfigName("config.yaml")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("..")
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("failed to load config file with error: %v", err)
 	}
@@ -27,12 +29,14 @@ func NewMainServerConfig() *MainServerConfig {
 			Host     string
 			Port     uint16
 			User     string
+			Password string
 			Database string
 		}{},
 	}
 	conf.PostgresDB.Host = viper.GetString("postgres.host")
 	conf.PostgresDB.Port = uint16(viper.GetInt("postgres.port"))
 	conf.PostgresDB.User = viper.GetString("postgres.user")
+	conf.PostgresDB.Password = viper.GetString("postgres.password")
 	conf.PostgresDB.Database = viper.GetString("postgres.database")
 
 	return &conf

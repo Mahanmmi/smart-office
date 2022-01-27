@@ -20,7 +20,7 @@ func NewAdminsTable(conn *pgx.Conn) AdminsTable {
 
 func (t *adminsTableImpl) init() {
 	_, err := t.conn.Exec("CREATE TABLE IF NOT EXISTS admins (" +
-		"user TEXT PRIMARY KEY, " +
+		"username TEXT PRIMARY KEY, " +
 		"password TEXT, " +
 		"office SMALLINT, " +
 		"FOREIGN KEY (office) REFERENCES offices(id) " +

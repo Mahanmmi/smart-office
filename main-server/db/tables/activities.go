@@ -21,12 +21,12 @@ func NewActivitiesTable(conn *pgx.Conn) ActivitiesTable {
 func (t *activitiesTableImpl) init() {
 	_, err := t.conn.Exec("CREATE TABLE IF NOT EXISTS activities (" +
 		"id SERIAL PRIMARY KEY, " +
-		"user SMALLINT, " +
+		"userid SMALLINT, " +
 		"office SMALLINT, " +
 		"datetime TIMESTAMP, " +
 		"type SMALLINT, " +
 		"FOREIGN KEY (office) REFERENCES offices(id), " +
-		"FOREIGN KEY (user) REFERENCES users(id) " +
+		"FOREIGN KEY (userid) REFERENCES users(id) " +
 		")")
 	if err != nil {
 		log.Fatalf("failed to initial activities table with error: %v", err)
