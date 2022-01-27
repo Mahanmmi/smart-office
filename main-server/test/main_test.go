@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 	}
 
 	database := db.NewMainServerDatabase(conn)
-	go src.NewMainServer(conf, database).Start()
+	src.NewMainServer(conf, database).Start()
 
 	m.Run()
 }

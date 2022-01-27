@@ -13,6 +13,8 @@ type MainServerConfig struct {
 		Password string
 		Database string
 	}
+	HTTPServerPort string
+	JWTSecret      []byte
 }
 
 func NewMainServerConfig() *MainServerConfig {
@@ -38,6 +40,9 @@ func NewMainServerConfig() *MainServerConfig {
 	conf.PostgresDB.User = viper.GetString("postgres.user")
 	conf.PostgresDB.Password = viper.GetString("postgres.password")
 	conf.PostgresDB.Database = viper.GetString("postgres.database")
+
+	conf.HTTPServerPort = viper.GetString("http.port")
+	conf.JWTSecret = []byte(viper.GetString("http.jwt_secret"))
 
 	return &conf
 }

@@ -22,5 +22,5 @@ func main() {
 	}
 
 	database := db.NewMainServerDatabase(conn)
-	go src.NewMainServer(conf, database).Start()
+	src.NewMainServer(conf, database).Start()
 }

@@ -4,3 +4,6 @@ postgres:
   user: "postgres"
   password: "postgres"
   database: "main_server"
+http:
+  port: 8080
+  jwt_secret: "secret"

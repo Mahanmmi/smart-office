@@ -1,0 +1,77 @@
+package http
+
+import (
+	"crypto/sha1"
+
+	"github.com/Mahanmmi/fuzzy-lamp/main-server/config"
+	"github.com/Mahanmmi/fuzzy-lamp/main-server/db"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+)
+
+type Server struct {
+	conf       *config.MainServerConfig
+	databases  *db.MainServerDatabase
+	echoServer *echo.Echo
+}
+
+func NewServer(conf *config.MainServerConfig, databases *db.MainServerDatabase) *Server {
+	server := Server{
+		conf:       conf,
+		databases:  databases,
+		echoServer: echo.New(),
+	}
+	server.echoServer.Use(middleware.Logger())
+	server.echoServer.Use(middleware.Recover())
+	server.echoServer.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+	}))
+
+	server.echoServer.GET("/api/office/register", server.OfficeRegister)
+
+	adminGroup := server.echoServer.Group("/api/admin")
+	adminGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		Claims:     &AdminClaims{},
+		SigningKey: server.conf.JWTSecret,
+		Skipper: func(c echo.Context) bool {
+			if c.Path() == "/api/admin/register" ||
+				c.Path() == "/api/admin/login" {
+				return true
+			}
+			return false
+		},
+	}))
+	adminGroup.POST("/register", server.AdminRegister)
+	adminGroup.POST("/login", server.AdminLogin)
+	adminGroup.POST("/user/register", server.UserRegister)
+	adminGroup.GET("/activities", server.GetActivities)
+	adminGroup.POST("/setlights", server.SetOfficeLightTimes)
+
+	userGroup := server.echoServer.Group("/api/user")
+	userGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		Claims:     &UserClaims{},
+		SigningKey: server.conf.JWTSecret,
+		Skipper: func(c echo.Context) bool {
+			if c.Path() == "/api/user/login" {
+				return true
+			}
+			return false
+		},
+	}))
+
+	return &server
+}
+
+func (s *Server) Start() {
+	go s.echoServer.Logger.Fatal(s.echoServer.Start(s.conf.HTTPServerPort))
+}
+
+func (s *Server) hashPassword(password string) (string, error) {
+	h := sha1.New()
+	_, err := h.Write([]byte(password))
+	if err != nil {
+		return "", err
+	}
+	return string(h.Sum(nil)), nil
+}
