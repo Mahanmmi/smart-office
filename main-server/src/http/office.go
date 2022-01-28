@@ -34,7 +34,7 @@ func (s *Server) OfficeRegister(c echo.Context) error {
 }
 
 func (s *Server) GetLightTimes(c echo.Context) error {
-	office, err := s.databases.Offices.GetByAPIKey(c.Param(c.Request().Header.Get("Authorization")))
+	office, err := s.databases.Offices.GetByAPIKey(c.Request().Header.Get("Authorization"))
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, echo.Map{
 			"error": "unauthorized",
@@ -48,17 +48,14 @@ func (s *Server) GetLightTimes(c echo.Context) error {
 }
 
 func (s *Server) CheckIn(c echo.Context) error {
-	office, err := s.databases.Offices.GetByAPIKey(c.Param(c.Request().Header.Get("Authorization")))
+	office, err := s.databases.Offices.GetByAPIKey(c.Request().Header.Get("Authorization"))
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, echo.Map{
 			"error": "unauthorized",
 		})
 	}
 
-	cardId := c.Param("cardid")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
+	cardId := c.QueryParam("cardid")
 
 	user, err := s.databases.Users.GetByCardID(cardId)
 	if err != nil {
@@ -76,9 +73,9 @@ func (s *Server) CheckIn(c echo.Context) error {
 		Datetime: time.Now(),
 	}
 
-	if c.Param("in") == "true" {
+	if c.QueryParam("in") == "true" {
 		activity.Type = tables.ActivityType_CheckIn
-	} else if c.Param("in") == "false" {
+	} else if c.QueryParam("in") == "false" {
 		activity.Type = tables.ActivityType_CheckOut
 	} else {
 		return c.JSON(http.StatusBadRequest, echo.Map{

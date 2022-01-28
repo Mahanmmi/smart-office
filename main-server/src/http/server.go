@@ -1,7 +1,8 @@
 package http
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 
 	"github.com/Mahanmmi/fuzzy-lamp/main-server/config"
@@ -73,10 +74,10 @@ func (s *Server) Start() {
 }
 
 func (s *Server) hashPassword(password string) (string, error) {
-	h := sha1.New()
+	h := sha256.New()
 	_, err := h.Write([]byte(password))
 	if err != nil {
 		return "", err
 	}
-	return string(h.Sum(nil)), nil
+	return base64.URLEncoding.EncodeToString(h.Sum(nil)), nil
 }

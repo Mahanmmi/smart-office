@@ -77,6 +77,7 @@ func (s *Server) AdminLogin(c echo.Context) error {
 }
 
 type UserRegisterRequest struct {
+	CardID   string `json:"card_id"`
 	Password string `json:"password"`
 	Office   int16  `json:"office"`
 	Room     int16  `json:"room"`
@@ -103,6 +104,7 @@ func (s *Server) UserRegister(c echo.Context) error {
 	}
 
 	username, err := s.databases.Users.Insert(tables.UsersTableRecord{
+		CardID:   req.CardID,
 		Password: hash,
 		Office:   req.Office,
 		Room:     req.Room,
