@@ -12,7 +12,6 @@ import (
 type Server struct {
 	conf       *config.LocalServerConfig
 	databases  *db.LocalServerDatabase
-	mqtt *pahomqtt.ClientOptions
 	client pahomqtt.Client
 }
 
@@ -20,15 +19,15 @@ func NewServer(conf *config.LocalServerConfig, databases *db.LocalServerDatabase
 	server := Server{
 		conf:       conf,
 		databases:  databases,
-		mqtt: pahomqtt.NewClientOptions(),
 		client: nil,
 	}
-    server.mqtt.AddBroker(fmt.Sprintf("tcp://%s:%d", server.conf.MQTT.Broker, server.conf.MQTT.Port))
-    server.mqtt.SetClientID(server.conf.MQTT.ClientID)
-	server.mqtt.SetOnConnectHandler(server.connectHandler)
-    server.mqtt.SetDefaultPublishHandler(server.messageHandler)
-	server.mqtt.SetConnectionLostHandler(server.connectionLostHandler)
-    server.client = pahomqtt.NewClient(server.mqtt)
+	opts := pahomqtt.NewClientOptions()
+    opts.AddBroker(fmt.Sprintf("tcp://%s:%d", server.conf.MQTT.Broker, server.conf.MQTT.Port))
+    opts.SetClientID(server.conf.MQTT.ClientID)
+	opts.SetOnConnectHandler(server.connectHandler)
+    opts.SetDefaultPublishHandler(server.messageHandler)
+	opts.SetConnectionLostHandler(server.connectionLostHandler)
+    server.client = pahomqtt.NewClient(opts)
 
 	return &server
 }
@@ -39,6 +38,7 @@ func (s *Server) Start() {
     }
 	s.subscribe("checkin")
 	s.subscribe("checkout")
+	s.subscribe("connect")
 	
 	//Dear server don't die!
 	var wg sync.WaitGroup

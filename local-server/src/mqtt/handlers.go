@@ -1,11 +1,10 @@
 package mqtt
 
-import(
-    pahomqtt "github.com/eclipse/paho.mqtt.golang"
+import (
 	"fmt"
-    "log"
-    "net/http"
-    "io/ioutil"
+	"log"
+
+	pahomqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 func (s *Server) connectHandler(client pahomqtt.Client) {
@@ -21,7 +20,9 @@ func (s *Server) messageHandler(client pahomqtt.Client, msg pahomqtt.Message){
 	if msg.Topic() == "checkin"{
         s.checkin(string(msg.Payload()))
 	}else if msg.Topic() == "checkout" {
-        
+        s.checkout(string(msg.Payload())) 
+    }else if msg.Topic() == "connect"{
+        s.officeConnectionHandler(string(msg.Payload()))
     }
 }
 
@@ -39,47 +40,8 @@ func (s *Server) subscribe(topic string) {
     token.Wait()
   	fmt.Printf("Subscribed to topic: %s", topic)
 }
-func (s *Server) checkin(cardId string){
-    fmt.Println("checkin", cardId)
-    client := &http.Client{}
-    req, err := http.NewRequest("GET", "http://localhost:8080/api/office/checkin", nil)
-    req.URL.Query().Add("cardid", cardId)
-    req.URL.Query().Add("in", "true")
-    req.Header.Add("Authorization", s.conf.OfficeAPIKey)
-    resp, err := client.Do(req)
-
-    if err != nil {
-        log.Fatalln(err)
-    }
-    
-    body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        log.Fatalln(err)
-    }
-
-    //Convert the body to type string
-    sb := string(body)
-    log.Printf(sb)
-}
-func (s *Server) checkout(cardId string){
-    fmt.Println("checkin", cardId)
-    client := &http.Client{}
-    req, err := http.NewRequest("GET", "http://localhost:8080/api/office/checkin", nil)
-    req.URL.Query().Add("cardid", cardId)
-    req.URL.Query().Add("in", "false")
-    req.Header.Add("Authorization", s.conf.OfficeAPIKey)
-    resp, err := client.Do(req)
-
-    if err != nil {
-        log.Fatalln(err)
-    }
-    
-    body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        log.Fatalln(err)
-    }
-
-    //Convert the body to type string
-    sb := string(body)
-    log.Printf(sb)   
+func (s *Server) officeConnectionHandler(clientId string){
+    lightSchedule := s.getOfficeLightSchedule()
+    log.Println()
+    s.publish("lightschedule", lightSchedule)
 }

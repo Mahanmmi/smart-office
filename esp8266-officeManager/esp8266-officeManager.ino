@@ -1,10 +1,5 @@
-#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
-#include <Servo.h>
-#include <SPI.h>
-#include <MFRC522.h>
-#include "Hash.h"
-#include "constants.h"
+#include "mqtthandlers.h"
+
 
 const char *ssid = APSSID;
 const char *password = APPSK;
@@ -27,6 +22,7 @@ struct KeyValue{
 };
 KeyValue cardInRoom[2] = {{CARD_ID_1, false},{CARD_ID_2, false}};
 
+
 double calculateDistance(){
 	// Clears the trigPin condition
 	digitalWrite(trigPin, LOW);
@@ -40,14 +36,22 @@ double calculateDistance(){
 	distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
 	return distance;
 }
-void turnOfficeLightsOn(){
-	digitalWrite(OFFICE_LIGHT, ON);
+void turnOfficeLight(int state){//1:on 0:off
+	if(state==1)
+		digitalWrite(OFFICE_LIGHT, ON);
+	else
+		digitalWrite(OFFICE_LIGHT, OFF);
 }
 void checkOfficeDoor(){
 	double distance = calculateDistance();
 	if (distance <= OBJECT_DETECTION_DISTANCE){
-		Serial.println("Object kamter az distance bemola");
-		turnOfficeLightsOn();
+		Serial.println("Object detected");
+		_time currentTime = getTime();
+		if(shouldTurnOnLight(currentTime)){
+			turnOfficeLight(1);
+		}else{
+			turnOfficeLight(0);
+		}
 	}
 }
 void moveDoor(int degree){
@@ -104,7 +108,7 @@ void connectWifi(){
 }
 void connectMQTT(){
 	client.setServer(MQTT_BROKER, MQTT_PORT);
-	client.setCallback(mqttListener);
+	client.setCallback(mqttMessageHandler);
 	while (!client.connected()) {
 		Serial.printf("The client %s connects to the public mqtt broker\n", mqtt_client_id);
 		// if (client.connect(mqtt_client_id.c_str(), mqtt_username, mqtt_password)) {
@@ -116,16 +120,6 @@ void connectMQTT(){
 			delay(2000);
 		}
 	}
-}
-void mqttListener(char *topic, byte *payload, unsigned int length) {
-	Serial.print("Message arrived in topic: ");
-	Serial.println(topic);
-	Serial.print("Message:");
-	for (int i = 0; i < length; i++) {
-		Serial.print((char) payload[i]);
-	}
-	Serial.println();
-	Serial.println("-----------------------");
 }
 void setup() {
 	//Serial
@@ -154,6 +148,13 @@ void setup() {
 
 	connectWifi();
 	connectMQTT();
+
+	client.subscribe(LIGHT_SCHEDULE_TOPIC);
+	client.publish(OFFICE_CONNECT_TOPIC, mqtt_client_id.c_str());
+
+	timeClient.begin();
+	timeClient.setTimeOffset(12600);
+
 }
 void loop() {
 	//OFFICE FOOR

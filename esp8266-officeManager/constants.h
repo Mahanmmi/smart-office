@@ -11,6 +11,9 @@ const char *MQTT_BROKER = "192.168.1.106";
 // const char *MQTT_PASSWORD = "public";
 const int MQTT_PORT = 9100;
 
+const char *OFFICE_CONNECT_TOPIC = "connect";
+const char *LIGHT_SCHEDULE_TOPIC = "lightschedule";
+
 // Ultrusonic
 #define echoPin D2
 #define trigPin D1
