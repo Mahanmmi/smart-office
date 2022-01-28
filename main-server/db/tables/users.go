@@ -86,7 +86,7 @@ func (t *usersTableImpl) GetByCardID(cardID string) (UsersTableRecord, error) {
 
 func (t *usersTableImpl) Insert(record UsersTableRecord) (int16, error) {
 	var id int16
-	err := t.conn.QueryRow("INSERT INTO users (card_id, password, light, office, room) VALUES ($1, $2, $3, $4) RETURNING id", record.CardID, record.Password, record.Light, record.Office, record.Room).Scan(&id)
+	err := t.conn.QueryRow("INSERT INTO users (card_id, password, light, office, room) VALUES ($1, $2, $3, $4, $5) RETURNING id", record.CardID, record.Password, record.Light, record.Office, record.Room).Scan(&id)
 	if err != nil {
 		return 0, err
 	}

@@ -82,7 +82,7 @@ func (t *officesTableImpl) GetByAPIKey(apiKey string) (OfficesTableRecord, error
 
 func (t *officesTableImpl) Insert(record OfficesTableRecord) (int16, error) {
 	var id int16
-	err := t.conn.QueryRow("INSERT INTO offices (light_on_time, light_off_time, api_key) VALUES ($1, $2, $3) RETURNING id", record.LightOnTime, record.LightOffTime, record.APIKey).Scan(&id)
+	err := t.conn.QueryRow("INSERT INTO offices (id, light_on_time, light_off_time, api_key) VALUES ($1, $2, $3, $4) RETURNING id", record.ID, record.LightOnTime, record.LightOffTime, record.APIKey).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
