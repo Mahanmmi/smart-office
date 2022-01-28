@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/Mahanmmi/fuzzy-lamp/main-server/db/tables"
 	"github.com/golang-jwt/jwt"
+	"github.com/jackc/pgx"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"time"
@@ -56,6 +57,9 @@ func (s *Server) AdminLogin(c echo.Context) error {
 	}
 
 	admin, err := s.databases.Admins.GetByUsername(req.Username)
+	if err == pgx.ErrNoRows {
+		return c.JSON(http.StatusUnauthorized, "Invalid username or password")
+	}
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
