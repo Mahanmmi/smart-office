@@ -38,20 +38,19 @@ bool shouldTurnOnLight(_time t){
 
   if(t.hour > lightsOnEntranceTimes[0].hour || (t.hour == lightsOnEntranceTimes[0].hour && t.minute >= lightsOnEntranceTimes[0].minute)){
     if(t.hour < lightsOnEntranceTimes[1].hour || (t.hour == lightsOnEntranceTimes[1].hour && t.minute <= lightsOnEntranceTimes[1].minute)){
-       Serial.print("now: ");
        Serial.print(t.hour);
        Serial.print(":");
-       Serial.println(t.minute);
+       Serial.print(t.minute);
 
-       Serial.print("Start: ");
+       Serial.print(" <= ");
        Serial.print(lightsOnEntranceTimes[0].hour);
        Serial.print(":");
-       Serial.println(lightsOnEntranceTimes[0].minute);
+       Serial.print(lightsOnEntranceTimes[0].minute);
 
-       Serial.print("End: ");
+       Serial.print(" <= ");
        Serial.print(lightsOnEntranceTimes[1].hour);
        Serial.print(":");
-       Serial.println(lightsOnEntranceTimes[1].minute);
+       Serial.print(lightsOnEntranceTimes[1].minute);
        return true;
     }
   }
@@ -75,7 +74,6 @@ void scheduleOfficeLights(String schedule){
         Serial.println(error.f_str());
         return;
     }
-    Serial.println((const char*)doc["light_off_time"]);
     String lightOffTime = (const char*)doc["light_off_time"];
     String lightOnTime= (const char*)doc["light_on_time"];
 

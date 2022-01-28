@@ -95,7 +95,7 @@ String checkRFID(){
 }
 double readLDR(){
 	int adc_value = analogRead(A0);
-	return (double)adc_value/950*100;
+	return (double)adc_value/1024*1.1;
 	// return (double)adc_value/1024*100;
 }
 void connectWifi(){
@@ -108,18 +108,17 @@ void connectWifi(){
 	Serial.println(WiFi.localIP());
 }
 void setRoomLightIntensity(double lightIntensity){
-
+	analogWrite(RX, lightIntensity * 250);
 }
 void adjustRoomSettings(double lightIntensity){
-	Serial.println("Adjuct kon");
 	myservo.write(DOOR_OPENED_DEGREE);
 	double l = 1 - readLDR();
 	if(l != lightIntensity){
+		Serial.printf("LDR: %f, Light: %f", l, lightIntensity);
 		setRoomLightIntensity(lightIntensity);
 	}
 }
 void closeRoom(){
-	Serial.println("beband berim");
 	myservo.write(DOOR_CLOSED_DEGREE);
 	setRoomLightIntensity(0);
 }
@@ -127,7 +126,6 @@ void connectMQTT(){
 	client.setServer(MQTT_BROKER, MQTT_PORT);
 	client.setCallback(mqttMessageHandler);
 	while (!client.connected()) {
-		Serial.printf("The client %s connects to the public mqtt broker\n", mqtt_client_id);
 		if (client.connect(mqtt_client_id.c_str())) {
 			Serial.println("connected to mqtt broker");
 		} else {
@@ -178,7 +176,8 @@ void setup() {
 	digitalWrite(OFFICE_LIGHT, OFF);
 
 	//LDR
-	// pinMode(RX, FUNCTION_3);
+	pinMode(RX, FUNCTION_3);
+	pinMode(RX, OUTPUT);
 	// pinMode(TX, FUNCTION_3);
 
 	connectWifi();
@@ -200,8 +199,6 @@ void loop() {
 	//RFID ROOM
 	checkRFID();
 
-	Serial.println(readLDR());
-	delay(500);
 	//MQTT
 	if(!client.connected()){
 		connectMQTT();
