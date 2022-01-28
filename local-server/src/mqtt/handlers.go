@@ -2,8 +2,10 @@ package mqtt
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
-    "fmt"
+	"time"
+
 	pahomqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -40,11 +42,28 @@ func (s *Server) subscribe(topic string) {
 	log.Printf("Subscribed to topic: %s\n", topic)
 }
 func (s *Server) checkinHandler(cardId string) {
-	resp := s.checkin(cardId)
-	var roomSettings map[string]interface{}
+    resp := s.checkin(cardId)
+    var userConfig UserEntity 
+    if value, ok := s.users[cardId]; ok{
+        if time.Now().Sub(value.registeredAt).Minutes() <= float64(s.conf.CacheExpireTime){ 
+            userConfig = value
+            log.Print("User config loaded from cache, Remaining Time(Mins): ")
+            log.Println(float64(s.conf.CacheExpireTime) - time.Now().Sub(userConfig.registeredAt).Minutes())
+        }else{
+            delete(s.users, cardId)
+            log.Print("User config in cache expired")
+        }
+    }
+    if userConfig == (UserEntity{}){
+        log.Print("User config not found in cache")
+        if err := json.Unmarshal([]byte(resp), &userConfig); err!= nil{
+            fmt.Println("Can not unmarshal JSON")
+        }
+        userConfig.registeredAt = time.Now()
+        s.users[cardId] = userConfig
+    }
 
-	json.Unmarshal([]byte(resp), &roomSettings)
-	s.publish("lightintensity", fmt.Sprintf("%v", roomSettings["light"]))
+	s.publish("lightintensity", fmt.Sprintf("%v", userConfig.Light))
 }
 func (s *Server) checkoutHandler(cardId string) {
     s.checkout(cardId)

@@ -18,8 +18,7 @@ type LocalServerConfig struct {
 		Port 	 uint16
 		ClientID string
 	}
-	// HTTPServerPort string
-	// JWTSecret      []byte
+	CacheExpireTime int
 	OfficeAPIKey string
 }
 
@@ -58,11 +57,7 @@ func NewLocalServerConfig() *LocalServerConfig {
 	conf.MQTT.ClientID = viper.GetString("mqtt.clientid")
 
 	conf.OfficeAPIKey = viper.GetString("office.apikey")
-
-	// conf.HTTPServerPort = viper.GetString("http.port")
-	// conf.JWTSecret = []byte(viper.GetString("http.jwt_secret"))
-
-	// conf.OfficeKeyIDMap = viper.GetStringMapString("offices")
+	conf.CacheExpireTime = viper.GetInt("cache-expiretime")
 
 	return &conf
 }
