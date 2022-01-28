@@ -63,6 +63,10 @@ String checkRFID(){
 	}
 	return "";
 }
+double readLDR(){
+	int adc_value = analogRead(A0);
+	return (double)adc_value/1024*100;
+}
 void connectWifi(){
 	WiFi.begin(ssid, password);
 	while (WiFi.status() != WL_CONNECTED) {
