@@ -13,9 +13,14 @@ type LocalServerConfig struct {
 		Password string
 		Database string
 	}
+	MQTT struct{
+		Broker 	 string
+		Port 	 uint16
+		ClientID string
+	}
 	// HTTPServerPort string
 	// JWTSecret      []byte
-	// OfficeKeyIDMap map[string]string
+	OfficeAPIKey string
 }
 
 func NewLocalServerConfig() *LocalServerConfig {
@@ -35,12 +40,24 @@ func NewLocalServerConfig() *LocalServerConfig {
 			Password string
 			Database string
 		}{},
+		MQTT: struct {
+			Broker 	 string
+			Port 	 uint16
+			ClientID string
+		}{},
 	}
 	conf.PostgresDB.Host = viper.GetString("postgres.host")
 	conf.PostgresDB.Port = uint16(viper.GetInt("postgres.port"))
 	conf.PostgresDB.User = viper.GetString("postgres.user")
 	conf.PostgresDB.Password = viper.GetString("postgres.password")
 	conf.PostgresDB.Database = viper.GetString("postgres.database")
+
+
+	conf.MQTT.Broker = viper.GetString("mqtt.broker")
+	conf.MQTT.Port = uint16(viper.GetInt("mqtt.port"))
+	conf.MQTT.ClientID = viper.GetString("mqtt.clientid")
+
+	conf.OfficeAPIKey = viper.GetString("office.apikey")
 
 	// conf.HTTPServerPort = viper.GetString("http.port")
 	// conf.JWTSecret = []byte(viper.GetString("http.jwt_secret"))
