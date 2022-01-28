@@ -7,8 +7,3 @@ postgres:
 http:
   port: 8080
   jwt_secret: "secret"
-offices:
-  "ff6a6e838cf4fa1d600dd37d6a11ea03": "1"
-  "c394b446050e20e897b103256600e826": "2"
-  "ce80219889cab08e78b58207902927fc": "3"
-  "7dab0fa643275945644fb80d753c9fd5": "4"

@@ -10,11 +10,13 @@ type OfficesTableRecord struct {
 	ID           int16
 	LightOnTime  time.Time
 	LightOffTime time.Time
+	APIKey       string
 }
 
 type OfficesTable interface {
 	GetAll() ([]OfficesTableRecord, error)
 	GetByID(id int16) (OfficesTableRecord, error)
+	GetByAPIKey(apiKey string) (OfficesTableRecord, error)
 	Insert(record OfficesTableRecord) (int16, error)
 	Update(record OfficesTableRecord) error
 	Delete(id int16) error
@@ -34,7 +36,8 @@ func (t *officesTableImpl) init() {
 	_, err := t.conn.Exec("CREATE TABLE IF NOT EXISTS offices (" +
 		"id SMALLINT PRIMARY KEY, " +
 		"light_on_time TIMESTAMP, " +
-		"light_off_time TIMESTAMP " +
+		"light_off_time TIMESTAMP, " +
+		"api_key VARCHAR(255) " +
 		")")
 	if err != nil {
 		log.Fatalf("failed to initial offices table with error: %v", err)
@@ -43,14 +46,14 @@ func (t *officesTableImpl) init() {
 
 func (t *officesTableImpl) GetAll() ([]OfficesTableRecord, error) {
 	var records []OfficesTableRecord
-	rows, err := t.conn.Query("SELECT id, light_on_time, light_off_time FROM offices")
+	rows, err := t.conn.Query("SELECT id, light_on_time, light_off_time, api_key FROM offices")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var record OfficesTableRecord
-		err = rows.Scan(&record.ID, &record.LightOnTime, &record.LightOffTime)
+		err = rows.Scan(&record.ID, &record.LightOnTime, &record.LightOffTime, &record.APIKey)
 		if err != nil {
 			return nil, err
 		}
@@ -61,7 +64,16 @@ func (t *officesTableImpl) GetAll() ([]OfficesTableRecord, error) {
 
 func (t *officesTableImpl) GetByID(id int16) (OfficesTableRecord, error) {
 	var record OfficesTableRecord
-	err := t.conn.QueryRow("SELECT id, light_on_time, light_off_time FROM offices WHERE id = $1", id).Scan(&record.ID, &record.LightOnTime, &record.LightOffTime)
+	err := t.conn.QueryRow("SELECT id, light_on_time, light_off_time, api_key FROM offices WHERE id = $1", id).Scan(&record.ID, &record.LightOnTime, &record.LightOffTime, &record.APIKey)
+	if err != nil {
+		return record, err
+	}
+	return record, nil
+}
+
+func (t *officesTableImpl) GetByAPIKey(apiKey string) (OfficesTableRecord, error) {
+	var record OfficesTableRecord
+	err := t.conn.QueryRow("SELECT id, light_on_time, light_off_time, api_key FROM offices WHERE api_key = $1", apiKey).Scan(&record.ID, &record.LightOnTime, &record.LightOffTime, &record.APIKey)
 	if err != nil {
 		return record, err
 	}
@@ -70,7 +82,7 @@ func (t *officesTableImpl) GetByID(id int16) (OfficesTableRecord, error) {
 
 func (t *officesTableImpl) Insert(record OfficesTableRecord) (int16, error) {
 	var id int16
-	err := t.conn.QueryRow("INSERT INTO offices (light_on_time, light_off_time) VALUES ($1, $2) RETURNING id", record.LightOnTime, record.LightOffTime).Scan(&id)
+	err := t.conn.QueryRow("INSERT INTO offices (light_on_time, light_off_time, api_key) VALUES ($1, $2, $3) RETURNING id", record.LightOnTime, record.LightOffTime, record.APIKey).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
