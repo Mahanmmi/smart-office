@@ -36,10 +36,7 @@ func (s *Server) Start() {
 	if token := s.client.Connect(); token.Wait() && token.Error() != nil {
         panic(token.Error())
     }
-	s.subscribe("checkin")
-	s.subscribe("checkout")
-	s.subscribe("connect")
-	
+
 	//Dear server don't die!
 	var wg sync.WaitGroup
 	wg.Add(1)

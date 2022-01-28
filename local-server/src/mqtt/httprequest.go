@@ -6,7 +6,7 @@ import(
     "io/ioutil"
 )
 
-func (s *Server) checkin(cardId string){
+func (s *Server) checkin(cardId string) string{
     client := &http.Client{}
     req, err := http.NewRequest("GET", "http://localhost:8080/api/office/checkin", nil)
     q := req.URL.Query()
@@ -14,8 +14,6 @@ func (s *Server) checkin(cardId string){
     q.Set("in", "true")
     req.URL.RawQuery = q.Encode()
     req.Header.Add("Authorization", s.conf.OfficeAPIKey)
-    log.Println(req)
-
     resp, err := client.Do(req)
 
     if err != nil {
@@ -31,17 +29,17 @@ func (s *Server) checkin(cardId string){
     log.Printf(resp.Status)   
     sb := string(body)
     log.Printf(sb)
+
+	return sb
 }
-func (s *Server) checkout(cardId string){
+func (s *Server) checkout(cardId string) string{
     client := &http.Client{}
     req, err := http.NewRequest("GET", "http://localhost:8080/api/office/checkin", nil)
     q := req.URL.Query()
     q.Set("cardid", cardId)
-    q.Set("in", "true")
+    q.Set("in", "false")
     req.URL.RawQuery = q.Encode()
     req.Header.Add("Authorization", s.conf.OfficeAPIKey)
-    log.Println(req)
-
     resp, err := client.Do(req)
 
     if err != nil {
@@ -57,13 +55,13 @@ func (s *Server) checkout(cardId string){
     sb := string(body)
     log.Printf(resp.Status)   
     log.Printf(sb)   
+
+	return sb
 }
 func (s *Server) getOfficeLightSchedule() string{
     client := &http.Client{}
     req, err := http.NewRequest("GET", "http://localhost:8080/api/office/lights", nil)
     req.Header.Add("Authorization", s.conf.OfficeAPIKey)
-    log.Println(req)
-
     resp, err := client.Do(req)
 
     if err != nil {

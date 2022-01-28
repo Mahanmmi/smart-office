@@ -13,6 +13,8 @@ const int MQTT_PORT = 9100;
 
 const char *OFFICE_CONNECT_TOPIC = "connect";
 const char *LIGHT_SCHEDULE_TOPIC = "lightschedule";
+const char *LIGHT_INTENSITY = "lightintensity";
+const char *CLOSE_ROOM = "closeroom";
 
 // Ultrusonic
 #define echoPin D2

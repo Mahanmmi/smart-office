@@ -57,3 +57,29 @@ bool shouldTurnOnLight(_time t){
   }
   return false;
 }
+_time parseTime(String time){
+    int i0 = time.indexOf(":");
+    int hour = time.substring(0, i0).toInt();
+    int i1 = time.lastIndexOf(":");
+    int min = time.substring(i0, i1).toInt();
+
+    return {hour, min};
+}
+void scheduleOfficeLights(String schedule){
+    StaticJsonDocument<200> doc;
+    DeserializationError error = deserializeJson(doc, schedule.c_str());
+
+    // Test if parsing succeeds.
+    if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+    }
+    Serial.println((const char*)doc["light_off_time"]);
+    String lightOffTime = (const char*)doc["light_off_time"];
+    String lightOnTime= (const char*)doc["light_on_time"];
+
+    _time onTime = parseTime(lightOnTime);
+    _time offTime = parseTime(lightOffTime);
+    addOnAndOffLightTimes(onTime, offTime);    
+}

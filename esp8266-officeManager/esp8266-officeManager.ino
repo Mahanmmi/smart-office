@@ -1,4 +1,4 @@
-#include "mqtthandlers.h"
+#include "timehandler.h"
 
 
 const char *ssid = APSSID;
@@ -95,7 +95,8 @@ String checkRFID(){
 }
 double readLDR(){
 	int adc_value = analogRead(A0);
-	return (double)adc_value/1024*100;
+	return (double)adc_value/950*100;
+	// return (double)adc_value/1024*100;
 }
 void connectWifi(){
 	WiFi.begin(ssid, password);
@@ -106,12 +107,27 @@ void connectWifi(){
 
 	Serial.println(WiFi.localIP());
 }
+void setRoomLightIntensity(double lightIntensity){
+
+}
+void adjustRoomSettings(double lightIntensity){
+	Serial.println("Adjuct kon");
+	myservo.write(DOOR_OPENED_DEGREE);
+	double l = 1 - readLDR();
+	if(l != lightIntensity){
+		setRoomLightIntensity(lightIntensity);
+	}
+}
+void closeRoom(){
+	Serial.println("beband berim");
+	myservo.write(DOOR_CLOSED_DEGREE);
+	setRoomLightIntensity(0);
+}
 void connectMQTT(){
 	client.setServer(MQTT_BROKER, MQTT_PORT);
 	client.setCallback(mqttMessageHandler);
 	while (!client.connected()) {
 		Serial.printf("The client %s connects to the public mqtt broker\n", mqtt_client_id);
-		// if (client.connect(mqtt_client_id.c_str(), mqtt_username, mqtt_password)) {
 		if (client.connect(mqtt_client_id.c_str())) {
 			Serial.println("connected to mqtt broker");
 		} else {
@@ -120,6 +136,24 @@ void connectMQTT(){
 			delay(2000);
 		}
 	}
+}
+void mqttMessageHandler(char *topic, byte *payload, unsigned int length) {
+	Serial.print("Message arrived in topic: ");
+	Serial.println(topic);
+	String message = "";
+	for (int i = 0; i < length; i++)
+		message += (char)payload[i];
+	
+	Serial.print("Message: "+message);
+	Serial.println("-----------------------");
+
+	if(String(topic) == String(LIGHT_SCHEDULE_TOPIC)){
+        scheduleOfficeLights(message);
+	}else if(String(topic) == String(LIGHT_INTENSITY)){
+		adjustRoomSettings((double)atoi(message.c_str())/100);
+    }else if(String(topic) == String(CLOSE_ROOM)){
+		closeRoom();
+    }
 }
 void setup() {
 	//Serial
@@ -133,6 +167,7 @@ void setup() {
 
 	//Servo
 	myservo.attach(SERVO);  
+	myservo.write(DOOR_CLOSED_DEGREE);
 
 	//Ultrasonic
 	pinMode(trigPin, OUTPUT); 
@@ -150,6 +185,8 @@ void setup() {
 	connectMQTT();
 
 	client.subscribe(LIGHT_SCHEDULE_TOPIC);
+	client.subscribe(LIGHT_INTENSITY);
+	client.subscribe(CLOSE_ROOM);
 	client.publish(OFFICE_CONNECT_TOPIC, mqtt_client_id.c_str());
 
 	timeClient.begin();
@@ -162,7 +199,9 @@ void loop() {
 	
 	//RFID ROOM
 	checkRFID();
-	
+
+	Serial.println(readLDR());
+	delay(500);
 	//MQTT
 	if(!client.connected()){
 		connectMQTT();
