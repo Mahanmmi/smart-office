@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
+	"github.com/jackc/pgx"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -24,6 +25,9 @@ func (s *Server) UserLogin(c echo.Context) error {
 	}
 
 	user, err := s.databases.Users.GetByID(req.UserID)
+	if err == pgx.ErrNoRows {
+		return c.JSON(http.StatusNotFound, "User not found")
+	}
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -66,6 +70,9 @@ func (s *Server) UpdateRoomLight(c echo.Context) error {
 	}
 
 	err := s.databases.Users.UpdateLightByID(claims.UserID, req.LightVal)
+	if err == pgx.ErrNoRows {
+		return c.JSON(http.StatusNotFound, "User not found")
+	}
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

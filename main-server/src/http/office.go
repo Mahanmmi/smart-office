@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/Mahanmmi/fuzzy-lamp/main-server/db/tables"
+	"github.com/jackc/pgx"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"time"
@@ -58,6 +59,9 @@ func (s *Server) CheckIn(c echo.Context) error {
 	cardId := c.QueryParam("cardid")
 
 	user, err := s.databases.Users.GetByCardID(cardId)
+	if err == pgx.ErrNoRows {
+		return c.JSON(http.StatusUnauthorized, "User not found")
+	}
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
