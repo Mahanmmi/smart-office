@@ -7,6 +7,7 @@ import (
 
 type UsersTableRecord struct {
 	ID       int16
+	CardID   string
 	Password string
 	Office   int16
 	Light    int16
@@ -16,6 +17,7 @@ type UsersTableRecord struct {
 type UsersTable interface {
 	GetAll() ([]UsersTableRecord, error)
 	GetByID(id int16) (UsersTableRecord, error)
+	GetByCardID(cardID string) (UsersTableRecord, error)
 	Insert(record UsersTableRecord) (int16, error)
 	UpdateLightByID(id int16, light int16) error
 	Delete(id int16) error
@@ -34,6 +36,7 @@ func NewUsersTable(conn *pgx.Conn) UsersTable {
 func (t *usersTableImpl) init() {
 	_, err := t.conn.Exec("CREATE TABLE IF NOT EXISTS users (" +
 		"id SERIAL PRIMARY KEY, " +
+		"card_id TEXT, " +
 		"password TEXT, " +
 		"light SMALLINT, " +
 		"office SMALLINT, " +
@@ -54,7 +57,7 @@ func (t *usersTableImpl) GetAll() ([]UsersTableRecord, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var record UsersTableRecord
-		err = rows.Scan(&record.ID, &record.Password, &record.Light, &record.Office, &record.Room)
+		err = rows.Scan(&record.ID, &record.CardID, &record.Password, &record.Light, &record.Office, &record.Room)
 		if err != nil {
 			return nil, err
 		}
@@ -65,7 +68,16 @@ func (t *usersTableImpl) GetAll() ([]UsersTableRecord, error) {
 
 func (t *usersTableImpl) GetByID(id int16) (UsersTableRecord, error) {
 	var record UsersTableRecord
-	err := t.conn.QueryRow("SELECT * FROM users WHERE id = $1", id).Scan(&record.ID, &record.Password, &record.Light, &record.Office, &record.Room)
+	err := t.conn.QueryRow("SELECT * FROM users WHERE id = $1", id).Scan(&record.ID, &record.CardID, &record.Password, &record.Light, &record.Office, &record.Room)
+	if err != nil {
+		return record, err
+	}
+	return record, nil
+}
+
+func (t *usersTableImpl) GetByCardID(cardID string) (UsersTableRecord, error) {
+	var record UsersTableRecord
+	err := t.conn.QueryRow("SELECT * FROM users WHERE card_id = $1", cardID).Scan(&record.ID, &record.CardID, &record.Password, &record.Light, &record.Office, &record.Room)
 	if err != nil {
 		return record, err
 	}
@@ -74,7 +86,7 @@ func (t *usersTableImpl) GetByID(id int16) (UsersTableRecord, error) {
 
 func (t *usersTableImpl) Insert(record UsersTableRecord) (int16, error) {
 	var id int16
-	err := t.conn.QueryRow("INSERT INTO users (password, light, office, room) VALUES ($1, $2, $3, $4) RETURNING id", record.Password, record.Light, record.Office, record.Room).Scan(&id)
+	err := t.conn.QueryRow("INSERT INTO users (card_id, password, light, office, room) VALUES ($1, $2, $3, $4) RETURNING id", record.CardID, record.Password, record.Light, record.Office, record.Room).Scan(&id)
 	if err != nil {
 		return 0, err
 	}

@@ -15,7 +15,6 @@ type MainServerConfig struct {
 	}
 	HTTPServerPort string
 	JWTSecret      []byte
-	OfficeKeyIDMap map[string]string
 }
 
 func NewMainServerConfig() *MainServerConfig {
@@ -44,8 +43,6 @@ func NewMainServerConfig() *MainServerConfig {
 
 	conf.HTTPServerPort = viper.GetString("http.port")
 	conf.JWTSecret = []byte(viper.GetString("http.jwt_secret"))
-
-	conf.OfficeKeyIDMap = viper.GetStringMapString("offices")
 
 	return &conf
 }

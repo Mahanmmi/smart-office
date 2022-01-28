@@ -2,6 +2,7 @@ package http
 
 import (
 	"crypto/sha1"
+	"fmt"
 
 	"github.com/Mahanmmi/fuzzy-lamp/main-server/config"
 	"github.com/Mahanmmi/fuzzy-lamp/main-server/db"
@@ -68,7 +69,7 @@ func NewServer(conf *config.MainServerConfig, databases *db.MainServerDatabase) 
 }
 
 func (s *Server) Start() {
-	go s.echoServer.Logger.Fatal(s.echoServer.Start(s.conf.HTTPServerPort))
+	s.echoServer.Logger.Fatal(s.echoServer.Start(fmt.Sprintf(":%s", s.conf.HTTPServerPort)))
 }
 
 func (s *Server) hashPassword(password string) (string, error) {
