@@ -21,6 +21,12 @@ Servo myservo;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
+struct KeyValue{
+	String key;
+	bool value;
+};
+KeyValue cardInRoom[2] = {{CARD_ID_1, false},{CARD_ID_2, false}};
+
 double calculateDistance(){
 	// Clears the trigPin condition
 	digitalWrite(trigPin, LOW);
@@ -47,8 +53,24 @@ void checkOfficeDoor(){
 void moveDoor(int degree){
 	myservo.write(degree);
 }
+void changeCardState(String content){
+	for (int i=0; i<sizeof(cardInRoom); i++){
+		if(cardInRoom[i].key == content){
+			if(!cardInRoom[i].value){
+				client.publish("checkin", content.c_str());	
+			}else{
+				client.publish("checkout", content.c_str());
+			}
+			cardInRoom[i].value = !cardInRoom[i].value;
+			break;
+		}
+	}
+}
 String checkRFID(){
-	if (mfrc522.PICC_IsNewCardPresent()) {
+	static int lastCardCheck; 
+	if(millis() - lastCardCheck < REST_AFTER_CHECK)
+		return "";
+	if(mfrc522.PICC_IsNewCardPresent()) {
 		if (mfrc522.PICC_ReadCardSerial()) {
 			String content= "";
 			byte letter;
@@ -57,7 +79,11 @@ String checkRFID(){
 				content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
 				content.concat(String(mfrc522.uid.uidByte[i], HEX));
 			}
+			content.trim();
 			Serial.println(content);
+			
+			changeCardState(content);
+			lastCardCheck = millis();
 			return content;
 		}
 	}
@@ -123,12 +149,11 @@ void setup() {
 	digitalWrite(OFFICE_LIGHT, OFF);
 
 	//LDR
-	pinMode(RX, FUNCTION_3);
-	pinMode(TX, FUNCTION_3);
+	// pinMode(RX, FUNCTION_3);
+	// pinMode(TX, FUNCTION_3);
 
 	connectWifi();
 	connectMQTT();
-	client.subscribe("test1");
 }
 void loop() {
 	//OFFICE FOOR

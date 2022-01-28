@@ -40,30 +40,46 @@ func (s *Server) subscribe(topic string) {
   	fmt.Printf("Subscribed to topic: %s", topic)
 }
 func (s *Server) checkin(cardId string){
-    resp, err := http.Get("http://localhost:8080/api/office/checkin?cardid=id&in=true")
+    fmt.Println("checkin", cardId)
+    client := &http.Client{}
+    req, err := http.NewRequest("GET", "http://localhost:8080/api/office/checkin", nil)
+    req.URL.Query().Add("cardid", cardId)
+    req.URL.Query().Add("in", "true")
+    req.Header.Add("Authorization", s.conf.OfficeAPIKey)
+    resp, err := client.Do(req)
+
     if err != nil {
         log.Fatalln(err)
     }
-    //We Read the response body on the line below.
+    
     body, err := ioutil.ReadAll(resp.Body)
     if err != nil {
         log.Fatalln(err)
     }
+
     //Convert the body to type string
     sb := string(body)
     log.Printf(sb)
 }
 func (s *Server) checkout(cardId string){
-    resp, err := http.Get("http://localhost:8080/api/office/checkin?cardid=id&in=false")
+    fmt.Println("checkin", cardId)
+    client := &http.Client{}
+    req, err := http.NewRequest("GET", "http://localhost:8080/api/office/checkin", nil)
+    req.URL.Query().Add("cardid", cardId)
+    req.URL.Query().Add("in", "false")
+    req.Header.Add("Authorization", s.conf.OfficeAPIKey)
+    resp, err := client.Do(req)
+
     if err != nil {
         log.Fatalln(err)
     }
-    //We Read the response body on the line below.
+    
     body, err := ioutil.ReadAll(resp.Body)
     if err != nil {
         log.Fatalln(err)
     }
+
     //Convert the body to type string
     sb := string(body)
-    log.Printf(sb)
+    log.Printf(sb)   
 }

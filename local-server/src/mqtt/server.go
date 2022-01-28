@@ -34,18 +34,14 @@ func NewServer(conf *config.LocalServerConfig, databases *db.LocalServerDatabase
 }
 
 func (s *Server) Start() {
-
-	getAuthenticatedUsers()	
-	//Start MQTT
 	if token := s.client.Connect(); token.Wait() && token.Error() != nil {
         panic(token.Error())
     }
+	s.subscribe("checkin")
+	s.subscribe("checkout")
 	
 	//Dear server don't die!
 	var wg sync.WaitGroup
 	wg.Add(1)
 	wg.Wait() 
-}
-func getAuthenticatedUsers(){
-	
 }
