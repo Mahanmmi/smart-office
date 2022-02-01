@@ -1,6 +1,19 @@
 # fuzzy-lamp
+An IoT system for managing offices and rooms door, light, etc.
 
-To run the project:
+## Used Languages & Technologies & Protocols
+- Golang
+- CPP
+- MQTT
+- HTTP
+- Docker
+- PostgreSQL
+- NodeMCU ESP8266 Board
+- Postman
+
+## Architecture
+
+## Run the project
 
 - `docker-compose up`
 - To run main server: `cd main-server && go run .`
