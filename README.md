@@ -12,6 +12,7 @@ An IoT system for managing offices and rooms door, light, etc.
 - Postman
 
 ## Architecture
+file:///home/pwdz/Desktop/Untitled%20Diagram.drawio.png![image](https://user-images.githubusercontent.com/44570354/152060473-85385d9c-d07a-4883-92b8-3e6948932b35.png)
 
 ## Run the project
 
